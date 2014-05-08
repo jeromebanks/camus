@@ -126,6 +126,8 @@ public class EtlRecordReader extends RecordReader<EtlKey, CamusWrapper> {
         } catch (Exception e) {
             if (!skipSchemaErrors) {
                 throw new IOException(e);
+            } else {
+            	log.warn(" Error received while interpeting payload for topic " + topicName , e);
             }
         }
         return r;
@@ -254,6 +256,7 @@ public class EtlRecordReader extends RecordReader<EtlKey, CamusWrapper> {
                         wrapper = getWrappedRecord(key.getTopic(), bytes);
                     } catch (Exception e) {
                         if (exceptionCount < getMaximumDecoderExceptionsToPrint(context)) {
+                        	log.warn("Received error while getting wrapped records ", e);
                             mapperContext.write(key, new ExceptionWritable(e));
                             exceptionCount++;
                         } else if (exceptionCount == getMaximumDecoderExceptionsToPrint(context)) {
@@ -320,6 +323,7 @@ public class EtlRecordReader extends RecordReader<EtlKey, CamusWrapper> {
                 Exception e = new Exception(t.getLocalizedMessage(), t);
                 e.setStackTrace(t.getStackTrace());
                 mapperContext.write(key, new ExceptionWritable(e));
+                log.warn(" Received error while reading records ", e);
                 reader = null;
                 continue;
             }

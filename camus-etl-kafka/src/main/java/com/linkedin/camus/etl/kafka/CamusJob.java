@@ -135,7 +135,14 @@ public class CamusJob extends Configured implements Tool {
 	  populateConf(props, getConf(), log);
 	  
 	  job = new Job(getConf());
-	  job.setJarByClass(CamusJob.class);
+	  ////job.setJarByClass(CamusJob.class);
+	  //// XXX JDB FIXME
+	  //// Need to avoid setJarByClass, because job submitter will try
+	  ////  to "copyFromLocal", so that it will be in distrib cache
+	  ////  From satisfaction, jar is on HDFS ...
+	  ////  XXX If we need to, copy resource files to local 
+	  ////  and use local class loader for tracks ...
+	  log.info(" Not Setting Job Jar By Class");
 	  
 	   if(job.getConfiguration().get("camus.job.name") != null)
 	    {

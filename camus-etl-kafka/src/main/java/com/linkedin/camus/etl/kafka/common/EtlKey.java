@@ -5,12 +5,13 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Map;
 
-import com.linkedin.camus.etl.IEtlKey;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.UTF8;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
+
+import com.linkedin.camus.etl.IEtlKey;
 
 /**
  * The key for the mapreduce job to pull kafka. Contains offsets and the

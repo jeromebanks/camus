@@ -17,6 +17,7 @@ import kafka.message.MessageAndOffset;
 
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import com.linkedin.camus.etl.kafka.CamusJob;
@@ -54,6 +55,7 @@ public class KafkaReader {
 			int clientTimeout, int fetchBufferSize) throws Exception {
 		this.fetchBufferSize = fetchBufferSize;
 		this.context = context;
+		
 
 		log.info("bufferSize=" + fetchBufferSize);
 		log.info("timeout=" + clientTimeout);
@@ -101,7 +103,8 @@ public class KafkaReader {
 	 */
 	public boolean getNext(EtlKey key, BytesWritable payload ,BytesWritable pKey) throws IOException {
 		if (hasNext()) {
-
+			if( log.isDebugEnabled())
+               log.debug(" getNext hasNext() " + key.getBeginOffset() + " end offset " + key.getOffset()  + " topic = " + key.getTopic() );
 			MessageAndOffset msgAndOffset = messageIter.next();
 			Message message = msgAndOffset.message();
 

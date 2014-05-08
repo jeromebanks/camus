@@ -497,7 +497,6 @@ public class EtlInputFormat extends InputFormat<EtlKey, CamusWrapper> {
 		for (Path input : inputs) {
 			FileSystem fs = input.getFileSystem(context.getConfiguration());
 			for (FileStatus f : fs.listStatus(input, new OffsetFileFilter())) {
-				log.info("previous offset file:" + f.getPath().toString());
 				SequenceFile.Reader reader = new SequenceFile.Reader(fs,
 						f.getPath(), context.getConfiguration());
 				EtlKey key = new EtlKey();
