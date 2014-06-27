@@ -175,6 +175,8 @@ public class CamusJob extends Configured implements Tool {
 						log.info("Adding Jar to Distributed Cache Archive File:"
 								+ status[i].getPath());
 
+						System.out.println("Adding Jar to Distributed Cache Archive File:"
+								+ status[i].getPath());
 						DistributedCache
 								.addFileToClassPath(status[i].getPath(),
 										conf, fs);
@@ -193,6 +195,7 @@ public class CamusJob extends Configured implements Tool {
 			String[] jarFiles = externalJarList.split(",");
 			for (String jarFile : jarFiles) {
 				log.info("Adding external jar File:" + jarFile);
+				System.out.println("Adding external jar File:" + jarFile);
 				DistributedCache.addFileToClassPath(new Path(jarFile),
 						conf, fs);
 			}
@@ -210,6 +213,8 @@ public class CamusJob extends Configured implements Tool {
 		FileSystem fs = FileSystem.get(job.getConfiguration());
 
 		log.info("Dir Destination set to: "
+				+ EtlMultiOutputFormat.getDestinationPath(job));
+		System.out.println("Dir Destination set to: "
 				+ EtlMultiOutputFormat.getDestinationPath(job));
 
 		Path execBasePath = new Path(props.getProperty(ETL_EXECUTION_BASE_PATH));
