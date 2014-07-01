@@ -26,26 +26,39 @@ public class AvroRestSchemaRegistry implements SchemaRegistry<Schema> {
 	public String register(String topic, Schema schema) {
 		Subject subject = client.lookup(topic);
 
+		//// XXX
+		//// JDB FIXME
+		//// What is that method suppossed to do ???
+		/**
 		if (subject == null) {
 			subject = client.register(topic, "org.apache.avro.repo.Validator");
 		}
+		***/
 
 		try {
 			return subject.register(schema.toString()).getId();
 		} catch (SchemaValidationException e) {
+			e.printStackTrace(System.out);
+			e.printStackTrace(System.err);
 			throw new SchemaRegistryException(e);
 		}
 	}
 
 	@Override
 	public Schema getSchemaByID(String topic, String id) {
+		/**
+		 *  JDB XXX Get rid of Avro subject  nonsense
 		Subject subject = client.lookup(topic);
+		
 
 		if (subject == null) {
-			throw new SchemaNotFoundException("Schema not found for " + topic);
+			throw new SchemaNotFoundException(" Client look up Schema not found for " + topic);
 		}
+		***/
+		
 
-		SchemaEntry entry = subject.lookupById(id);
+		///SchemaEntry entry = subject.lookupById(id);
+		SchemaEntry entry = client.lookupByID(id);
 
 		if (entry == null)
 			throw new SchemaNotFoundException("Schema not found for " + topic

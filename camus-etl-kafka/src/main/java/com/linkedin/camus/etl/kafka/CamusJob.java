@@ -306,7 +306,12 @@ public class CamusJob extends Configured implements Tool {
 		startTiming("commit");
 
 		// Send Tracking counts to Kafka
-		sendTrackingCounts(job, fs, newExecutionOutput);
+		if( getPostTrackingCountsToKafka(job)) {
+			log.info(" Sending the Trackng counts to Kafka");
+		   sendTrackingCounts(job, fs, newExecutionOutput);
+		} else {
+			log.info(" Not sending the Trackng counts to Kafka");
+		}
 
 		// Print any potentail errors encountered
 		printErrors(fs, newExecutionOutput);
