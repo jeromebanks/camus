@@ -58,8 +58,8 @@ public class AvroRestSchemaRegistry implements SchemaRegistry<Schema> {
 		
 
 		///SchemaEntry entry = subject.lookupById(id);
-		SchemaEntry entry = client.lookupByID(id);
 
+		 SchemaEntry entry = client.lookupByID(id);
 		if (entry == null)
 			throw new SchemaNotFoundException("Schema not found for " + topic
 					+ " " + id);

@@ -91,6 +91,7 @@ public class CamusJob extends Configured implements Tool {
 	private static org.apache.log4j.Logger log;
 
 	private final Properties props;
+	private Job job = null;
 
 	public CamusJob() throws IOException {
 		this(new Properties());
@@ -153,6 +154,12 @@ public class CamusJob extends Configured implements Tool {
 	     job.setJobName("Camus Job");
 	   }
 	   
+	   //// Attempt to set the job username 
+	   if(job.getConfiguration().get("camus.job.user") != null ) 
+	   {
+	     job.setUser( job.getConfiguration().get("camus.job.user"));
+	   }
+	   
 	  return job;
 	}
 
@@ -201,12 +208,16 @@ public class CamusJob extends Configured implements Tool {
 			}
 		}
 	}
+	
+	public Job getHadoopJob() {
+		return job;
+	}
 
 	public void run() throws Exception {
 
 		startTiming("pre-setup");
 		startTiming("total");
-		Job job = createJob(props);
+		job = createJob(props);
 		if (getLog4jConfigure(job)) {
 			DOMConfigurator.configure("log4j.xml");
 		}
@@ -290,6 +301,8 @@ public class CamusJob extends Configured implements Tool {
 
 		stopTiming("pre-setup");
 		job.submit();
+
+		job.monitorAndPrintJob();
 		job.waitForCompletion(true);
 
 		// dump all counters
@@ -313,7 +326,7 @@ public class CamusJob extends Configured implements Tool {
 			log.info(" Not sending the Trackng counts to Kafka");
 		}
 
-		// Print any potentail errors encountered
+		// Print any potential errors encountered
 		printErrors(fs, newExecutionOutput);
 
 		Path newHistory = new Path(execHistory, executionDate);
@@ -323,23 +336,27 @@ public class CamusJob extends Configured implements Tool {
 		log.info("Job finished");
 		stopTiming("commit");
 		stopTiming("total");
-		createReport(job, timingMap);
-
-		if (!job.isSuccessful()) {
+	    createReport(job, timingMap);
+		if( !job.isSuccessful()) {
 			JobClient client = new JobClient(
 					new JobConf(job.getConfiguration()));
 
 			TaskCompletionEvent[] tasks = job.getTaskCompletionEvents(0);
+			log.info( "Number of Tasks = " +  tasks.length);
+			if( tasks.length > 0 ) {
 
-			for (TaskReport task : client.getMapTaskReports(tasks[0]
+			  for (TaskReport task : client.getMapTaskReports(tasks[0]
 					.getTaskAttemptId().getJobID())) {
 				if (task.getCurrentStatus().equals(TIPStatus.FAILED)) {
 					for (String s : task.getDiagnostics()) {
 						System.err.println("task error: " + s);
 					}
 				}
+			  }
+			  throw new RuntimeException("hadoop job failed");
+			} else {
+			  throw new RuntimeException("no hadoop tasks were generated");
 			}
-			throw new RuntimeException("hadoop job failed");
 		}
 	}
 

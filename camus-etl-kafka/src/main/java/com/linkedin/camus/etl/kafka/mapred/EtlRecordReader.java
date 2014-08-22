@@ -80,6 +80,7 @@ public class EtlRecordReader extends RecordReader<EtlKey, CamusWrapper> {
             mapperContext = (Context) context;
         }
 
+
         this.skipSchemaErrors = EtlInputFormat.getEtlIgnoreSchemaErrors(context);
 
         if (EtlInputFormat.getKafkaMaxPullHrs(context) != -1) {
@@ -123,10 +124,12 @@ public class EtlRecordReader extends RecordReader<EtlKey, CamusWrapper> {
         CamusWrapper r = null;
         try {
             r = decoder.decode(payload);
+           this.context.getCounter( "Camus Records Read", topicName ).increment(1);
         } catch (Exception e) {
             if (!skipSchemaErrors) {
                 throw new IOException(e);
             } else {
+                this.context.getCounter( "Camus Decode Errors", topicName ).increment(1);
             	log.warn(" Error received while interpeting payload for topic " + topicName , e);
             }
         }
@@ -323,6 +326,7 @@ public class EtlRecordReader extends RecordReader<EtlKey, CamusWrapper> {
                 Exception e = new Exception(t.getLocalizedMessage(), t);
                 e.setStackTrace(t.getStackTrace());
                 mapperContext.write(key, new ExceptionWritable(e));
+                mapperContext.getCounter("Camus Decode Errors", t.getMessage()).increment(1);
                 log.warn(" Received error while reading records ", e);
                 reader = null;
                 continue;
