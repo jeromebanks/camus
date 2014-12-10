@@ -20,6 +20,9 @@ public class EtlMapper extends Mapper<EtlKey, AvroWrapper<Object>, EtlKey, AvroW
 	@Override
 	public void map(EtlKey key, AvroWrapper<Object> val, Context context) throws IOException, InterruptedException {
 		long startTime = System.currentTimeMillis();
+		
+		/// XXX JDB - pass the Context to be available 
+		GlobalContext.setContext( context);
 
 		context.write(key, val);
 

@@ -55,7 +55,6 @@ public class KafkaReader {
 			int clientTimeout, int fetchBufferSize) throws Exception {
 		this.fetchBufferSize = fetchBufferSize;
 		this.context = context;
-		
 
 		log.info("bufferSize=" + fetchBufferSize);
 		log.info("timeout=" + clientTimeout);

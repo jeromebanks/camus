@@ -12,7 +12,7 @@ import com.linkedin.camus.etl.kafka.mapred.EtlInputFormat;
 
 public class MessageDecoderFactory {
     
-    public static MessageDecoder<?,?> createMessageDecoder(TaskAttemptContext context, String topicName){
+    public static MessageDecoder<?,?> createMessageDecoder(JobContext context, String topicName){
         MessageDecoder<?,?> decoder;
         try {
             decoder = (MessageDecoder<?,?>) EtlInputFormat.getMessageDecoderClass(context).newInstance();
@@ -21,7 +21,6 @@ public class MessageDecoderFactory {
             for (Entry<String, String> entry : context.getConfiguration()){
                 props.put(entry.getKey(), entry.getValue());
             }
-            props.put("camus.task.context", context);
             
             decoder.init(props, topicName);
             

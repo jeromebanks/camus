@@ -135,7 +135,15 @@ public class CamusJob extends Configured implements Tool {
 	  
 	  populateConf(props, getConf(), log);
 	  
-	  job = new Job(getConf());
+	  /// XXX JDB 
+	  ///  Need to create with JobConf
+	  ///   in order to set correct queuename 
+	  /// because they are using old API
+	  JobConf jc = new JobConf( getConf());
+	  jc.setQueueName( props.getProperty("mapreduce.job.queuename", "default"));
+	  jc.setUser( props.getProperty("camus.job.user","Camus"));
+
+	  job = new Job(jc);
 	  ////job.setJarByClass(CamusJob.class);
 	  //// XXX JDB FIXME
 	  //// Need to avoid setJarByClass, because job submitter will try
@@ -152,12 +160,6 @@ public class CamusJob extends Configured implements Tool {
 	   else
 	   {
 	     job.setJobName("Camus Job");
-	   }
-	   
-	   //// Attempt to set the job username 
-	   if(job.getConfiguration().get("camus.job.user") != null ) 
-	   {
-	     job.setUser( job.getConfiguration().get("camus.job.user"));
 	   }
 	   
 	  return job;

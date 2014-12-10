@@ -36,6 +36,7 @@ public class EtlCounts {
 	private static final String LAST_TIMESTAMP = "lastTimestamp";
 	private static final String ERROR_COUNT = "errorCount";
 	private static final String MONITORING_EVENT_CLASS = "monitoring.event.class";
+	private static final String MONITORING_EVENT_TOPIC = "monitoring.event.topic";
 	
 	private String topic;
 	private long startTime;
@@ -196,6 +197,7 @@ public class EtlCounts {
 	public void postTrackingCountToKafka(Configuration conf , String tier, String brokerList) {
 		MessageEncoder<IndexedRecord, byte[]> encoder;
 		AbstractMonitoringEvent monitoringDetails;
+		String monitoringTopicName = conf.get(MONITORING_EVENT_TOPIC, "TrackingMonitoringEvent");
 		try {
 			encoder = (MessageEncoder<IndexedRecord, byte[]>) Class.forName(
 					conf.get(CamusJob.CAMUS_MESSAGE_ENCODER_CLASS))
@@ -206,7 +208,7 @@ public class EtlCounts {
 				props.put(entry.getKey(), entry.getValue());
 			}
 
-			encoder.init(props, "TrackingMonitoringEvent");
+			encoder.init(props, monitoringTopicName);
 			monitoringDetails = (AbstractMonitoringEvent) Class.forName(conf.get(MONITORING_EVENT_CLASS))
 					.getDeclaredConstructor(Configuration.class).newInstance(conf);
 		} catch (Exception e1) {
@@ -226,20 +228,20 @@ public class EtlCounts {
 
 			if (monitorSet.size() >= 2000) {
 				counts += monitorSet.size();
-				produceCount(brokerList, monitorSet);
+				produceCount(monitoringTopicName, brokerList, monitorSet);
 				monitorSet.clear();
 			}
 		}
 
 		if (monitorSet.size() > 0) {
 			counts += monitorSet.size();
-			produceCount(brokerList, monitorSet);
+			produceCount(monitoringTopicName,brokerList, monitorSet);
 		}
 
 		log.info(topic + " sent " + counts + " counts");
 	}
 
-	private void produceCount(String brokerList, ArrayList<byte[]> monitorSet) {
+	private void produceCount(String monitoringTopicName,String brokerList, ArrayList<byte[]> monitorSet) {
 		// Shuffle the broker
 
 		Properties props = new Properties();
@@ -252,7 +254,7 @@ public class EtlCounts {
 		try {
 			for (byte[] message : monitorSet) {
 				KeyedMessage keyedMessage = new KeyedMessage(
-						"TrackingMonitoringEvent", message);
+						monitoringTopicName, message);
 				producer.send(keyedMessage);
 			}
 		} catch (Exception e) {
