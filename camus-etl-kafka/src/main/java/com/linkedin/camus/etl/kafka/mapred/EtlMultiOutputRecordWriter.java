@@ -9,6 +9,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 
 import com.linkedin.camus.coders.CamusWrapper;
@@ -16,6 +17,7 @@ import com.linkedin.camus.etl.IEtlKey;
 import com.linkedin.camus.etl.RecordWriterProvider;
 import com.linkedin.camus.etl.kafka.common.EtlKey;
 import com.linkedin.camus.etl.kafka.common.ExceptionWritable;
+import org.apache.avro.generic.GenericData.Record;
 
 public class EtlMultiOutputRecordWriter extends RecordWriter<EtlKey, Object>
 {
@@ -23,6 +25,8 @@ public class EtlMultiOutputRecordWriter extends RecordWriter<EtlKey, Object>
   private Writer errorWriter = null;
   private String currentTopic = "";
   private long beginTimeStamp = 0;
+
+  private static Logger log = Logger.getLogger(EtlMultiOutputRecordWriter.class);
 
   private HashMap<String, RecordWriter<IEtlKey, CamusWrapper>> dataWriters =
       new HashMap<String, RecordWriter<IEtlKey, CamusWrapper>>();
@@ -97,7 +101,19 @@ public class EtlMultiOutputRecordWriter extends RecordWriter<EtlKey, Object>
         {
           dataWriters.put(workingFileName, getDataRecordWriter(context, workingFileName, value));
         }
-        dataWriters.get(workingFileName).write(key, value);
+        try {
+          dataWriters.get(workingFileName).write(key, value);
+        } catch(IOException ioe) {
+          //I think we are dealing with org.apache.avro.generic.GenericData.Record but test it first
+          log.error(val.getClass().getName());
+          log.error("serialization failure on, key: " + key.toString() + " val: " + val.toString());
+          try {
+            Record avroRecord = (Record) val;
+            log.error("input record schema: " + avroRecord.getSchema());
+            log.error(avroRecord.toString());
+          } catch(Exception e) {} //just eat it since casting failed
+          throw ioe;
+        }
       }
     }
     else if (val instanceof ExceptionWritable)
