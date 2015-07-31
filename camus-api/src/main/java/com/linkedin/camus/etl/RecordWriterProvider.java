@@ -1,7 +1,10 @@
 package com.linkedin.camus.etl;
 
 import com.linkedin.camus.coders.CamusWrapper;
+
 import java.io.IOException;
+import java.util.Properties;
+
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
@@ -11,6 +14,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
  *
  */
 public interface RecordWriterProvider {
+	
 
     String getFilenameExtension();
 

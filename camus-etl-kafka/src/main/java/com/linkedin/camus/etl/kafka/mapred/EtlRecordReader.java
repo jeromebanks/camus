@@ -124,12 +124,18 @@ public class EtlRecordReader extends RecordReader<EtlKey, CamusWrapper> {
         CamusWrapper r = null;
         try {
             r = decoder.decode(payload);
-           this.context.getCounter( "Camus Records Read", topicName ).increment(1);
+            //// XXX JDB 
+            /// Still have the issue with too many counters 
+            ///  Uncomment when this gets fixed 
+           ////this.context.getCounter( "Camus Records Read", topicName ).increment(1);
         } catch (Exception e) {
             if (!skipSchemaErrors) {
                 throw new IOException(e);
             } else {
-                this.context.getCounter( "Camus Decode Errors", topicName ).increment(1);
+                //// XXX JDB 
+                /// Still have the issue with too many counters 
+                ///  Uncomment when this gets fixed 
+                ////this.context.getCounter( "Camus Decode Errors", topicName ).increment(1);
             	log.warn(" Error received while interpeting payload for topic " + topicName , e);
             }
         }

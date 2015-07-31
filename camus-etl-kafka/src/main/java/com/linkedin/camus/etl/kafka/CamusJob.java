@@ -308,6 +308,9 @@ public class CamusJob extends Configured implements Tool {
 		job.waitForCompletion(true);
 
 		// dump all counters
+		//// JDB Error with too many counters 
+		///
+		/***
 		Counters counters = job.getCounters();
 		if(counters != null) {
 		  for (String groupName : counters.getGroupNames()) {
@@ -320,6 +323,7 @@ public class CamusJob extends Configured implements Tool {
 		} else {
 			log.warn(" Unable to get Counters");
 		}
+		**/
 
 		stopTiming("hadoop");
 		startTiming("commit");
@@ -602,7 +606,6 @@ public class CamusJob extends Configured implements Tool {
 		}
 
 		public boolean accept(Path path) {
-			// TODO Auto-generated method stub
 			return path.getName().startsWith(prefix);
 		}
 	}
